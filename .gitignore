@@ -18,3 +18,4 @@ _deps
 auto-save-list
 tramp
 .\#*
+build/persistence

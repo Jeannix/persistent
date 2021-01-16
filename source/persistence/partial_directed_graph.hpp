@@ -12,27 +12,56 @@ class PartialNode {
  public:
   typedef Type data_type;
 
-  PartialNode() {}
+  PartialNode(){
+		data_=nullptr;
+		forward_=nullptr;
+		out_ptrs_size_=0;
+		backward_=nullptr; 
+		in_ptrs_size_=0;
+	}
 
   PartialNode(data_type const& data, std::size_t const& out_ptrs_size,
               std::size_t const& in_ptrs_size) {
     backward_ = new PartialNode<Type>*[in_ptrs_size]();
+		forward_ = new PartialNode<Type>*[out_ptrs_size]();
   }
 
-  data_type get_data(unsigned int version) { return data_; }
+  data_type get_data(unsigned int version){ 
+		data(new data_type(data_));
+		return *data_; 
+	}
 
-  bool set_data(data_type const& data) { return true; }
+  bool set_data(data_type const& data){
+		if(data==nullptr){
+			return false
+		}
+		this->data=data;
+		return true; 
+	}
 
   PartialNode* insert_vertex(std::size_t const& position,
                              data_type const& data) {
+		
     return nullptr;
   }
 
-  bool update_edge(std::size_t const& position, PartialNode* v) { return true; }
+  bool update_edge(std::size_t const& position, PartialNode* v){ 
+		if (out_ptrs_size_ < position) {
+      throw std::out_of_range("Position out of first argument node.");
+    }
+    forward_[position] = v;
+		return true;
+	}
 
   PartialNode& operator[](
       std::pair<std::size_t, unsigned int> const& position_version) const {
-    return;
+		if (out_ptrs_size_ < position_version) {
+      throw std::out_of_range("Index out of node edges range.");
+    }
+    if (!forward_[position_version]) {
+      throw std::logic_error("Access to null reference.");
+    }
+    return *forward_[position_version];
   }
 
   data_type* data_;
@@ -55,11 +84,19 @@ class PartialDirectedGraph {
   PartialDirectedGraph(data_type const data, std::size_t const& out_ptrs_size,
                        std::size_t const& in_ptrs_size) {}
 
-  Node* get_root_ptr(unsigned int const& version) { return nullptr; }
+  Node* get_root_ptr(unsigned int const& version){
+		return root_ptr_ + version;
+	}
+  Node get_root(unsigned int const& version){
+		return root_ptr_[version];
+	}
 
-  Node get_root(unsigned int const& version) { return; }
-
-  bool add_edge(Node* u, Node* v, std::size_t position) {
+  bool add_edge(Node* u, Node* v, std::size_t position){
+		if (u->out_ptrs_size_ < position) {
+			throw std::out_of_range("Position out of first argument node.");
+		}
+		u->forward_[position] = v;
+		v->backward_[position] = u;
     ++(*current_version_);
     return true;
   }

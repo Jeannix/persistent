@@ -101,7 +101,7 @@ class DirectedGraph {
       : root_ptr_(new Node(data, out_ptrs_size)),
         out_ptrs_size_(out_ptrs_size) {}
 
-  virtual ~DirectedGraph() {}
+  virtual ~DirectedGraph() { delete root_ptr_; }
 
   Node* get_root_ptr() { return root_ptr_; }
 
